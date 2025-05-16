@@ -65,7 +65,7 @@ $(document).ready(function () {
             }
         }
 
-        // Añadir manejador de clic a las células (para dibujar)
+        // Añadir evento de clic a las células (para dibujar)
         $('.celula').on('click', function () {
             const fila = parseInt($(this).attr('fila'));
             const columna = parseInt($(this).attr('columna'));
@@ -88,7 +88,7 @@ $(document).ready(function () {
         poblacion = 0;
         for (let i = 0; i < filas; i++) {
             for (let j = 0; j < columnas; j++) {
-                estadoCuadricula[i][j] = Math.random() > 0.7 ? 1 : 0; // Aproximadamente 30% de células vivas
+                estadoCuadricula[i][j] = Math.random() > 0.7 ? 1 : 0; // 30% de células vivas
                 const celula = $(`#cuadricula .celula[fila="${i}"][columna="${j}"]`);
                 if (estadoCuadricula[i][j] === 1) {
                     celula.addClass('viva');
@@ -114,12 +114,12 @@ $(document).ready(function () {
         for (let i = 0; i < filas; i++) {
             for (let j = 0; j < columnas; j++) {
                 estadoCuadricula[i][j] = 0;
-                $(`#cuadricula .celula[fila="${i}"][columna="${j}"]`).removeClass('viva');
             }
         }
+        $('#cuadricula .celula').removeClass('viva');
         poblacion = 0;
 
-        // Calcular posición central 
+        // Calcular centro
         const inicioFila = Math.floor((filas - patron.length) / 2);
         const inicioColumna = Math.floor((columnas - patron[0].length) / 2);
 
@@ -147,7 +147,7 @@ $(document).ready(function () {
             for (let j = -1; j <= 1; j++) {
                 if (i === 0 && j === 0) {
                     continue;
-                 };
+                };
 
                 const filaVecino = fila + i;
                 const columnaVecino = columna + j;
@@ -165,13 +165,13 @@ $(document).ready(function () {
     function calcularSiguienteGeneracion() {
         const siguienteEstadoCuadricula = [];
         let nuevaPoblacion = 0;
-        let siguienteEsIgualAnterior = true; //Es la siguiente generación idéntica a la de que veninmos? true => detener el juego
+        let siguienteEsIgualAnterior = true; //Es la siguiente generación idéntica a la de la que veninmos? true => detener el juego
         for (let i = 0; i < filas; i++) {
             siguienteEstadoCuadricula[i] = [];
             for (let j = 0; j < columnas; j++) {
                 const vecinosVivos = contarVecinosVivos(i, j);
 
-                // Aplicar reglas del Juego de la Vida
+                // Aplicar reglas 
 
                 if (estadoCuadricula[i][j] === 1) { // Si célula viva
                     if (vecinosVivos < 2 || vecinosVivos > 3) {
@@ -188,19 +188,20 @@ $(document).ready(function () {
                         siguienteEstadoCuadricula[i][j] = 0; // Sigue muerta
                     }
                 }
-                if (siguienteEsIgualAnterior && siguienteEstadoCuadricula[i][j] !== estadoCuadricula[i][j]) {
-                    siguienteEsIgualAnterior = false;
+                if (siguienteEsIgualAnterior) {
+                    siguienteEsIgualAnterior = siguienteEstadoCuadricula[i][j] === estadoCuadricula[i][j];
                 }
             }
         }
         if (siguienteEsIgualAnterior) { // Detener juego
             detenerSimulacion();
-            $('#mensaje-estabilizacion').show();
+            $('#mensaje-estabilizacion').fadeIn(500);
         } else {
             estadoCuadricula = siguienteEstadoCuadricula;
             generacion++;
             poblacion = nuevaPoblacion;
-            $('#mensaje-estabilizacion').hide();
+            $('#mensaje-estabilizacion').fadeOut(500);
+            actualizarVisualizacion();
         }
         $('#generacion').text(generacion);
         $('#poblacion').text(poblacion);
@@ -233,7 +234,7 @@ $(document).ready(function () {
             juegoCorriendo = true;
             $('#iniciar').prop('disabled', true);
             $('#detener').prop('disabled', false);
-            $('#patrones').prop('disabled', true); 
+            $('#patrones').prop('disabled', true);
             intervaloSimulacion = setInterval(function () {
                 calcularSiguienteGeneracion();
             }, velocidadSimulacion);
@@ -245,14 +246,14 @@ $(document).ready(function () {
             juegoCorriendo = false;
             $('#iniciar').prop('disabled', false);
             $('#detener').prop('disabled', true);
-            $('#patrones').prop('disabled', false); 
+            $('#patrones').prop('disabled', false);
             clearInterval(intervaloSimulacion);
         }
     }
 
     function reiniciarJuego() {
         detenerSimulacion();
-        crearCuadricula(filas, columnas); 
+        crearCuadricula(filas, columnas);
     }
 
     function pasoAPaso() {
